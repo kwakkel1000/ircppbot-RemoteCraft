@@ -63,9 +63,23 @@ void RemoteCraft::parse_privmsg()
     }
 }
 
-void RemoteCraft::ParsePrivmsg(std::vector< std::string > data)
-{
 
+void RemoteCraft::ParsePrivmsg(std::string nick, std::string command, std::string chan, std::vector< std::string > args, int chantrigger)
+{
+    std::cout << "RemoteCraft" << std::endl;
+    UsersInterface& U = Global::Instance().get_Users();
+    std::string auth = U.GetAuth(nick);
+    if (args.size() == 0)
+    {
+        if (boost::iequals(command,"start"))
+        {
+            StartServer();
+        }
+        if (boost::iequals(command,"stop"))
+        {
+            StopServer();
+        }
+    }
 }
 
 void RemoteCraft::StartServer()
