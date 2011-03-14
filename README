@@ -1,0 +1,3 @@
+building:
+make clean
+make all

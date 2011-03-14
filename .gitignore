@@ -1,0 +1,9 @@
+conf/*.ini
+*.cbp
+*.o
+*.so
+*.svn
+.svn
+.svn*
+*_build_log.html
+*.layout
