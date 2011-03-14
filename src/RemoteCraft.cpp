@@ -109,7 +109,7 @@ void RemoteCraft::StopServer()
     parse_sock->Recv(recvdata);
     parse_sock->Send("\r\n");
     parse_sock->Send("\r\n");
-    parse_sock->Send(".closewrapper\r\n");
+    parse_sock->Send(".stopwrapper\r\n");
 }
 
 
