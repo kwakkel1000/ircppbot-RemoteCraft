@@ -49,6 +49,10 @@ void RemoteCraft::stop()
 void RemoteCraft::read()
 {
     run = true;
+    std::string chan;
+    chan = Global::Instance().get_ConfigReader().GetString("remotecraftchannel");
+    std::string send_string = "JOIN " + chan + "\r\n";
+    send(send_string);
     assert(!privmsg_parse_thread);
     privmsg_parse_thread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&RemoteCraft::parse_privmsg, this)));
 }
@@ -59,7 +63,7 @@ void RemoteCraft::parse_privmsg()
     while(run)
     {
         data = mpDataInterface->GetPrivmsgQueue();
-        PRIVMSG(data, "$");
+        PRIVMSG(data, Global::Instance().get_ConfigReader().GetString("trigger"));
     }
 }
 
@@ -110,6 +114,8 @@ void RemoteCraft::StopServer()
     parse_sock->Send("\r\n");
     parse_sock->Send("\r\n");
     parse_sock->Send(".stopwrapper\r\n");
+    parse_sock->Disconnect();
+    delete parse_sock;
 }
 
 
