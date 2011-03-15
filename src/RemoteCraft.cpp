@@ -96,8 +96,9 @@ void RemoteCraft::StartServer(std::string nick)
 		int pid=fork();
 		if (!pid)
 		{
-			std::string exe = Global::Instance().get_ConfigReader().GetString("remotecraftstartexecutable");
-			char *arg[] = {"bash", (char*)exe.c_str(), NULL};
+			//std::string exe = Global::Instance().get_ConfigReader().GetString("remotecraftstartexecutable");
+			//char *arg[] = {"bash", (char*)exe.c_str(), NULL};
+			char *arg[] = {"bash", "start_gt.sh", NULL};
 			execvp("bash", arg);
 		}
 	}
