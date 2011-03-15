@@ -51,7 +51,7 @@ void RemoteCraft::read()
     run = true;
     std::string chan;
     chan = Global::Instance().get_ConfigReader().GetString("remotecraftchannel");
-    usleep(20000000);
+    usleep(10000000);
     std::string send_string = "JOIN " + chan + "\r\n";
     Send(send_string);
     assert(!privmsg_parse_thread);
@@ -110,11 +110,20 @@ void RemoteCraft::StopServer()
         std::cout << "Exception caught: " << e.Description() << " (" << e.Errornr() << ")" << std::endl;
         exit(1);
     }
+    std::string irc_string;
     std::string recvdata;
     parse_sock->Recv(recvdata);
+    irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
+    Send(irc_string);
+    usleep(10000000);
     parse_sock->Send("\r\n");
     parse_sock->Send("\r\n");
     parse_sock->Send(".stopwrapper\r\n");
+    parse_sock->Recv(recvdata);
+    irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
+    Send(irc_string);
+    usleep(10000000);
+
     parse_sock->Disconnect();
     delete parse_sock;
 }
