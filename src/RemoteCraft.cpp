@@ -51,6 +51,7 @@ void RemoteCraft::read()
     run = true;
     std::string chan;
     chan = Global::Instance().get_ConfigReader().GetString("remotecraftchannel");
+    usleep(20000000);
     std::string send_string = "JOIN " + chan + "\r\n";
     Send(send_string);
     assert(!privmsg_parse_thread);
