@@ -110,12 +110,8 @@ void RemoteCraft::StopServer()
         std::cout << "Exception caught: " << e.Description() << " (" << e.Errornr() << ")" << std::endl;
         exit(1);
     }
-    std::string irc_string;
-    std::string recvdata;
-    parse_sock->Recv(recvdata);
-    irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
-    Send(irc_string);
-    usleep(2000000);
+    std::string irc_string = "";
+    std::string recvdata = "";
     parse_sock->Recv(recvdata);
     irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
     Send(irc_string);
