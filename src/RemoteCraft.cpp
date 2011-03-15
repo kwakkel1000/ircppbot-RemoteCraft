@@ -115,14 +115,17 @@ void RemoteCraft::StopServer()
     parse_sock->Recv(recvdata);
     irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
     Send(irc_string);
-    usleep(10000000);
-    parse_sock->Send("\r\n");
-    parse_sock->Send("\r\n");
-    parse_sock->Send(".stopwrapper\r\n");
+    usleep(2000000);
     parse_sock->Recv(recvdata);
     irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
     Send(irc_string);
-    usleep(10000000);
+    parse_sock->Send("\r\n");
+    parse_sock->Recv(recvdata);
+    irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
+    Send(irc_string);
+    parse_sock->Send("\r\n");
+    parse_sock->Send(".stopwrapper\r\n");
+    usleep(2000000);
 
     parse_sock->Disconnect();
     delete parse_sock;
