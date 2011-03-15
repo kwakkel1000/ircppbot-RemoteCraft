@@ -78,53 +78,65 @@ void RemoteCraft::ParsePrivmsg(std::string nick, std::string command, std::strin
     {
         if (boost::iequals(command,"start"))
         {
-            StartServer();
+            StartServer(nick);
         }
         if (boost::iequals(command,"stop"))
         {
-            StopServer();
+            StopServer(nick);
         }
     }
 }
 
-void RemoteCraft::StartServer()
+void RemoteCraft::StartServer(std::string nick)
 {
-	int pid=fork();
-    if (!pid)
-    {
-    	char *arg[] = {"bash", "start_minecraft_server", NULL};
-		execvp("bash", arg);
-    }
+    UsersInterface& U = Global::Instance().get_Users();
+	int oaccess = U.GetOaccess(nick);
+	if (oaccess >= 5)
+	{
+		int pid=fork();
+		if (!pid)
+		{
+			char *arg[] = {"bash", "start_minecraft_server", NULL};
+			execvp("bash", arg);
+		}
+	}
 }
 
-void RemoteCraft::StopServer()
+void RemoteCraft::StopServer(std::string nick)
 {
-	IrcSocket *parse_sock;
-    try
-    {
-        parse_sock = new IrcSocket();
-        parse_sock->Connect( "localhost", "9989" );
-    }
-    catch (IrcSocket::Exception& e)
-    {
-        std::cout << "Exception caught: " << e.Description() << " (" << e.Errornr() << ")" << std::endl;
-        exit(1);
-    }
-    std::string irc_string = "";
-    std::string recvdata = "";
-    parse_sock->Recv(recvdata);
-    irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
-    Send(irc_string);
-    parse_sock->Send("\r\n");
-    parse_sock->Recv(recvdata);
-    irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
-    Send(irc_string);
-    parse_sock->Send("\r\n");
-    parse_sock->Send(".stopwrapper\r\n");
-    usleep(2000000);
+    UsersInterface& U = Global::Instance().get_Users();
+	int oaccess = U.GetOaccess(nick);
+	if (oaccess >= 5)
+	{
+		IrcSocket *parse_sock;
+		try
+		{
+			parse_sock = new IrcSocket();
+			parse_sock->Connect( "localhost", Global::Instance().get_ConfigReader().GetString("remotecrafttcpport") );
+		}
+		catch (IrcSocket::Exception& e)
+		{
+			std::cout << "Exception caught: " << e.Description() << " (" << e.Errornr() << ")" << std::endl;
+			exit(1);
+		}
+		std::string irc_string = "";
+		std::string recvdata = "";
+		std::string name = Global::Instance().get_ConfigReader().GetString("remotecraftname") + "\r\n";
+		std::string pass = Global::Instance().get_ConfigReader().GetString("remotecraftpass") + "\r\n";
+		parse_sock->Recv(recvdata);
+		irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
+		Send(irc_string);
+		parse_sock->Send(name);
+		parse_sock->Recv(recvdata);
+		irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
+		Send(irc_string);
+		parse_sock->Send(pass);
+		parse_sock->Send(".stopwrapper\r\n");
+		usleep(2000000);
 
-    parse_sock->Disconnect();
-    delete parse_sock;
+		parse_sock->Disconnect();
+		delete parse_sock;
+	}
 }
 
 
