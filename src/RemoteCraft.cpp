@@ -64,7 +64,7 @@ void RemoteCraft::parse_privmsg()
     while(run)
     {
         data = mpDataInterface->GetPrivmsgQueue();
-        PRIVMSG(data, Global::Instance().get_ConfigReader().GetString("trigger"));
+        PRIVMSG(data, Global::Instance().get_ConfigReader().GetString("remotecrafttrigger"));
     }
 }
 
