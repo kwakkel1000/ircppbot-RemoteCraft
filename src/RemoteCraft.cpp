@@ -50,9 +50,11 @@ void RemoteCraft::read()
 {
     run = true;
     std::string chan;
+    std::string pass;
     chan = Global::Instance().get_ConfigReader().GetString("remotecraftchannel");
+    pass = Global::Instance().get_ConfigReader().GetString("remotecraftchannelpass");
     usleep(10000000);
-    std::string send_string = "JOIN " + chan + "\r\n";
+    std::string send_string = "JOIN " + chan + " " + pass + "\r\n";
     Send(send_string);
     assert(!privmsg_parse_thread);
     privmsg_parse_thread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&RemoteCraft::parse_privmsg, this)));
