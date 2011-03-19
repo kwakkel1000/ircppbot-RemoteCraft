@@ -17,6 +17,9 @@ all: default
 $(OUTPUT): $(SRC_DIR)$(OBJECTS)
 	$(CXX_LINK) -o $(LIB_DIR)$@ $(OBJECTS) $(LIBRARIES)
 
+update:
+	git pull
+
 cleanDebug: clean
 cleanRelease: clean
 clean:
