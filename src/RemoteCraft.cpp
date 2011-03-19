@@ -104,9 +104,10 @@ void RemoteCraft::StartServer(std::string nick)
 			strcpy (program, exe.c_str());
 			char *arg[] = {"bash", program, NULL};
 			execvp("bash", arg);
-			std::string irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server started\r\n";
-			Send(irc_string);
 		}
+		usleep(2000000);
+		std::string irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server started\r\n";
+		Send(irc_string);
 	}
 }
 
@@ -139,10 +140,14 @@ void RemoteCraft::StopServer(std::string nick)
 		parse_sock->Send(pass);
 		parse_sock->Send("save-all\r\n");
 		usleep(2000000);
+		irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server saving\r\n";
+		Send(irc_string);
 		parse_sock->Send("save-off\r\n");
 		usleep(2000000);
 		parse_sock->Send("save-on\r\n");
 		usleep(10000000);
+		irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server save done\r\n";
+		Send(irc_string);
 		parse_sock->Send(".stopwrapper\r\n");
 		usleep(2000000);
 		irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server stopped wait 10seconds before starting it again\r\n";
