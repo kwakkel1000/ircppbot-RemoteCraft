@@ -129,9 +129,7 @@ void RemoteCraft::StartServer(std::string nick, bool force)
 				client_socket->Recv(recvdata);
 				irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
 				Send(irc_string);
-				client_socket->Recv(recvdata);
 				client_socket->Send(name);
-				client_socket->Recv(recvdata);
 				client_socket->Send(pass);
 				client_socket->Recv(recvdata);
 				usleep(2000000);
@@ -191,9 +189,7 @@ void RemoteCraft::StopServer(std::string nick)
 			client_socket->Recv(recvdata);
 			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
 			Send(irc_string);
-			client_socket->Recv(recvdata);
 			client_socket->Send(name);
-			client_socket->Recv(recvdata);
 			client_socket->Send(pass);
 			client_socket->Recv(recvdata);
 			client_socket->Send("save-all\r\n");
