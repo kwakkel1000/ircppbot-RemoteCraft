@@ -41,7 +41,7 @@ private:
 	//parse functions
     void parse_privmsg();
     void ParsePrivmsg(std::string nick, std::string command, std::string chan, std::vector< std::string > args, int chantrigger);
-    void StartServer(std::string nick);
+    void StartServer(std::string nick, bool force);
     void StopServer(std::string nick);
 
     //post parse functions
