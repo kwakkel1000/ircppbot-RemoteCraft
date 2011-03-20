@@ -88,6 +88,10 @@ void RemoteCraft::ParsePrivmsg(std::string nick, std::string command, std::strin
         {
             StopServer(nick);
         }
+        if (boost::iequals(command,"save"))
+        {
+            SaveServer(nick);
+        }
     }
     if (args.size() == 1)
     {
@@ -210,12 +214,59 @@ void RemoteCraft::StopServer(std::string nick)
 		{
 			std::string irc_string = "";
 			std::cout << "Exception caught: " << e.Description() << " (" << e.Errornr() << ")" << std::endl;
-
 			std::stringstream ss;//create a stringstream
 			ss << e.Errornr();//add number to the stream
 			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" +  e.Description() + " (" + ss.str() + ")\r\n";
 			Send(irc_string);
 			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server couldnt be stopped\r\n";
+			Send(irc_string);
+		}
+	}
+}
+
+void RemoteCraft::SaveServer(std::string nick)
+{
+    UsersInterface& U = Global::Instance().get_Users();
+	int oaccess = U.GetOaccess(nick);
+	if (oaccess >= 5)
+	{
+		IrcSocket *client_socket;
+		try
+		{
+			client_socket = new IrcSocket();
+			client_socket->Connect( "localhost", Global::Instance().get_ConfigReader().GetString("remotecrafttcpport") );
+			std::string irc_string = "";
+			std::string recvdata = "";
+			std::string name = Global::Instance().get_ConfigReader().GetString("remotecraftname") + "\r\n";
+			std::string pass = Global::Instance().get_ConfigReader().GetString("remotecraftpass") + "\r\n";
+			usleep(2000000);
+			client_socket->Send(name);
+			client_socket->Send(pass);
+			usleep(2000000);
+			client_socket->Send("save-all\r\n");
+			usleep(2000000);
+			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server saving\r\n";
+			Send(irc_string);
+			client_socket->Send("save-off\r\n");
+			usleep(2000000);
+			client_socket->Send("save-on\r\n");
+			usleep(10000000);
+			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server save done\r\n";
+			Send(irc_string);
+			client_socket->Disconnect();
+			delete client_socket;
+			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :socked closed\r\n";
+			Send(irc_string);
+		}
+		catch (IrcSocket::Exception& e)
+		{
+			std::string irc_string = "";
+			std::cout << "Exception caught: " << e.Description() << " (" << e.Errornr() << ")" << std::endl;
+			std::stringstream ss;//create a stringstream
+			ss << e.Errornr();//add number to the stream
+			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" +  e.Description() + " (" + ss.str() + ")\r\n";
+			Send(irc_string);
+			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server couldnt be saved\r\n";
 			Send(irc_string);
 		}
 	}
