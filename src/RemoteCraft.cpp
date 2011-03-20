@@ -208,6 +208,8 @@ void RemoteCraft::StopServer(std::string nick)
 			Send(irc_string);
 			client_socket->Disconnect();
 			delete client_socket;
+			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :socked closed\r\n";
+			Send(irc_string);
 		}
 		catch (IrcSocket::Exception& e)
 		{
@@ -233,7 +235,6 @@ void RemoteCraft::timerrun()
     longtime++;
     if (longtime >= 30)
     {
-    	std::cout << "timed" << std::endl;
         timerlong();
         longtime = 0;
     }
