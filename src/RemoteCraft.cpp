@@ -132,6 +132,8 @@ void RemoteCraft::StartServer(std::string nick, bool force)
 				client_socket->Send(name);
 				client_socket->Send(pass);
 				client_socket->Recv(recvdata);
+				client_socket->Recv(recvdata);
+				client_socket->Recv(recvdata);
 				usleep(2000000);
 				client_socket->Disconnect();
 				delete client_socket;
@@ -191,6 +193,8 @@ void RemoteCraft::StopServer(std::string nick)
 			Send(irc_string);
 			client_socket->Send(name);
 			client_socket->Send(pass);
+			client_socket->Recv(recvdata);
+			client_socket->Recv(recvdata);
 			client_socket->Recv(recvdata);
 			client_socket->Send("save-all\r\n");
 			usleep(2000000);
