@@ -156,13 +156,13 @@ void RemoteCraft::StartServer(std::string nick, bool force)
 				execvp("bash", arg);
 			}
 			usleep(2000000);
-			std::string irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :if no error. then the server is started\r\n";
+			std::string irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :then the server is probably started\r\n";
 			Send(irc_string);
 		}
 		else
 		{
 			usleep(2000000);
-			std::string irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :then the server is not started\r\n";
+			std::string irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :the server is not started\r\n";
 			Send(irc_string);
 		}
 	}
