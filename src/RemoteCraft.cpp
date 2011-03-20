@@ -113,6 +113,9 @@ void RemoteCraft::StartServer(std::string nick, bool force)
 			bool start_up = false;
 			if (force)
 			{
+				std::string irc_string = "";
+				irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :forced starting up\r\n";
+				Send(irc_string);
 				start_up = true;
 			}
 			else
@@ -140,6 +143,9 @@ void RemoteCraft::StartServer(std::string nick, bool force)
 				}
 				catch (IrcSocket::Exception& e)
 				{
+					std::string irc_string = "";
+					irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server down. starting up\r\n";
+					Send(irc_string);
 					start_up = true;
 				}
 			}
