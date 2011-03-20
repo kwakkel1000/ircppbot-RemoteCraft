@@ -129,9 +129,11 @@ void RemoteCraft::StartServer(std::string nick, bool force)
 				client_socket->Recv(recvdata);
 				irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
 				Send(irc_string);
+				client_socket->Recv(recvdata);
 				client_socket->Send(name);
 				client_socket->Recv(recvdata);
 				client_socket->Send(pass);
+				client_socket->Recv(recvdata);
 				usleep(2000000);
 				client_socket->Disconnect();
 				delete client_socket;
@@ -146,10 +148,10 @@ void RemoteCraft::StartServer(std::string nick, bool force)
 				start_up = true;
 			}
 		}
-		int pid=fork();
-		if (!pid)
+		if (start_up)
 		{
-			if (start_up)
+			int pid=fork();
+			if (!pid)
 			{
 				char* program;
 				std::string exe = Global::Instance().get_ConfigReader().GetString("remotecraftstartexecutable");
@@ -158,10 +160,16 @@ void RemoteCraft::StartServer(std::string nick, bool force)
 				char *arg[] = {"bash", program, NULL};
 				execvp("bash", arg);
 			}
+			usleep(2000000);
+			std::string irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :if no error. then the server is started\r\n";
+			Send(irc_string);
 		}
-		usleep(2000000);
-		std::string irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :if no error. then the server is started\r\n";
-		Send(irc_string);
+		else
+		{
+			usleep(2000000);
+			std::string irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :then the server is not started\r\n";
+			Send(irc_string);
+		}
 	}
 }
 
@@ -183,9 +191,11 @@ void RemoteCraft::StopServer(std::string nick)
 			client_socket->Recv(recvdata);
 			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
 			Send(irc_string);
+			client_socket->Recv(recvdata);
 			client_socket->Send(name);
 			client_socket->Recv(recvdata);
 			client_socket->Send(pass);
+			client_socket->Recv(recvdata);
 			client_socket->Send("save-all\r\n");
 			usleep(2000000);
 			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server saving\r\n";
