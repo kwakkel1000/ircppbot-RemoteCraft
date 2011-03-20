@@ -107,48 +107,48 @@ void RemoteCraft::StartServer(std::string nick, bool force)
 	int oaccess = U.GetOaccess(nick);
 	if (oaccess >= 5)
 	{
-		int pid=fork();
-		if (!pid)
+		bool start_up = false;
+		if (force)
 		{
-			bool start_up = false;
-			if (force)
+			std::string irc_string = "";
+			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :forced starting up\r\n";
+			Send(irc_string);
+			start_up = true;
+		}
+		else
+		{
+			IrcSocket *client_socket;
+			try
+			{
+				client_socket = new IrcSocket();
+				client_socket->Connect( "localhost", Global::Instance().get_ConfigReader().GetString("remotecrafttcpport") );
+				std::string irc_string = "";
+				std::string recvdata = "";
+				std::string name = Global::Instance().get_ConfigReader().GetString("remotecraftname") + "\r\n";
+				std::string pass = Global::Instance().get_ConfigReader().GetString("remotecraftpass") + "\r\n";
+				client_socket->Recv(recvdata);
+				irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
+				Send(irc_string);
+				client_socket->Send(name);
+				client_socket->Recv(recvdata);
+				client_socket->Send(pass);
+				usleep(2000000);
+				client_socket->Disconnect();
+				delete client_socket;
+				irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server still running\r\n";
+				Send(irc_string);
+			}
+			catch (IrcSocket::Exception& e)
 			{
 				std::string irc_string = "";
-				irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :forced starting up\r\n";
+				irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server down. starting up\r\n";
 				Send(irc_string);
 				start_up = true;
 			}
-			else
-			{
-				IrcSocket *client_socket;
-				try
-				{
-					client_socket = new IrcSocket();
-					client_socket->Connect( "localhost", Global::Instance().get_ConfigReader().GetString("remotecrafttcpport") );
-					std::string irc_string = "";
-					std::string recvdata = "";
-					std::string name = Global::Instance().get_ConfigReader().GetString("remotecraftname") + "\r\n";
-					std::string pass = Global::Instance().get_ConfigReader().GetString("remotecraftpass") + "\r\n";
-					client_socket->Recv(recvdata);
-					irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :" + recvdata + "\r\n";
-					Send(irc_string);
-					client_socket->Send(name);
-					client_socket->Recv(recvdata);
-					client_socket->Send(pass);
-					usleep(2000000);
-					client_socket->Disconnect();
-					delete client_socket;
-					irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server still running\r\n";
-					Send(irc_string);
-				}
-				catch (IrcSocket::Exception& e)
-				{
-					std::string irc_string = "";
-					irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server down. starting up\r\n";
-					Send(irc_string);
-					start_up = true;
-				}
-			}
+		}
+		int pid=fork();
+		if (!pid)
+		{
 			if (start_up)
 			{
 				char* program;
