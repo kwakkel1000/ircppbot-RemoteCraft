@@ -92,6 +92,10 @@ void RemoteCraft::ParsePrivmsg(std::string nick, std::string command, std::strin
         {
             SaveServer(nick);
         }
+        if (boost::iequals(command,"kill"))
+        {
+            KillServer(nick);
+        }
     }
     if (args.size() == 1)
     {
@@ -272,6 +276,27 @@ void RemoteCraft::SaveServer(std::string nick)
 	}
 }
 
+void RemoteCraft::KillServer(std::string nick)
+{
+    UsersInterface& U = Global::Instance().get_Users();
+	int oaccess = U.GetOaccess(nick);
+	if (oaccess >= 5)
+	{
+		int pid=fork();
+		if (!pid)
+		{
+			char* program;
+			std::string exe = Global::Instance().get_ConfigReader().GetString("remotecraftkill");
+			program = new char [exe.size()+1];
+			strcpy (program, exe.c_str());
+			char *arg[] = {"bash", program, NULL};
+			execvp("bash", arg);
+		}
+		usleep(2000000);
+		std::string irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :the server is hardly killed\r\n";
+		Send(irc_string);
+	}
+}
 
 void RemoteCraft::timerrun()
 {

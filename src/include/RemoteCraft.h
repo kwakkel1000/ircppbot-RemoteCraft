@@ -44,6 +44,7 @@ private:
     void StartServer(std::string nick, bool force);
     void StopServer(std::string nick);
     void SaveServer(std::string nick);
+    void KillServer(std::string nick);
 
     //post parse functions
     void Sample();
