@@ -47,7 +47,7 @@ private:
     void KillServer(std::string nick);
 
     //post parse functions
-    void Sample();
+    void save();
 
 	//timer
     void timerlong();
