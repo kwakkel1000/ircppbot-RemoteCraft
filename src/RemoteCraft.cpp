@@ -163,11 +163,12 @@ void RemoteCraft::StartServer(std::string nick, bool force)
 			if (!pid)
 			{
 				char* program;
+				char enviroment[] = "bash";
 				std::string exe = Global::Instance().get_ConfigReader().GetString("remotecraftstartexecutable");
 				program = new char [exe.size()+1];
 				strcpy (program, exe.c_str());
-				char *arg[] = {"bash", program, NULL};
-				execvp("bash", arg);
+				char *arg[] = {enviroment, program, NULL};
+				execvp(enviroment, arg);
 			}
 			usleep(2000000);
 			std::string irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :the server is probably started\r\n";
@@ -254,11 +255,12 @@ void RemoteCraft::KillServer(std::string nick)
 		if (!pid)
 		{
 			char* program;
+			char enviroment[] = "bash";
 			std::string exe = Global::Instance().get_ConfigReader().GetString("remotecraftkill");
 			program = new char [exe.size()+1];
 			strcpy (program, exe.c_str());
-			char *arg[] = {"bash", program, NULL};
-			execvp("bash", arg);
+			char *arg[] = {enviroment, program, NULL};
+			execvp(enviroment, arg);
 		}
 		usleep(2000000);
 		std::string irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :the server is hardly killed\r\n";
