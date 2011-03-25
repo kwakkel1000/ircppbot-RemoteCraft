@@ -129,6 +129,7 @@ void RemoteCraft::runConsoleCommand(std::string command)
 		client_socket = new IrcSocket();
 		client_socket->Connect( "localhost", Global::Instance().get_ConfigReader().GetString("json_port") );
 		std::string irc_string = "";
+		std::string recvdata = "";
 		std::string json_string;
 		std::string content_string;
 
@@ -178,8 +179,16 @@ void RemoteCraft::runConsoleCommand(std::string command)
 		std::cout << json_string << std::endl;
 		client_socket->Send(json_string);
 
-		std::cout << content_string << std::endl;
-		client_socket->Send(json_string);
+		client_socket->Recv(recvdata);
+		std::cout << recvdata << std::endl;
+		client_socket->Recv(recvdata);
+		std::cout << recvdata << std::endl;
+		client_socket->Recv(recvdata);
+		std::cout << recvdata << std::endl;
+		client_socket->Recv(recvdata);
+		std::cout << recvdata << std::endl;
+		client_socket->Recv(recvdata);
+		std::cout << recvdata << std::endl;
 
 		usleep(2000000);
 		client_socket->Disconnect();
@@ -189,6 +198,8 @@ void RemoteCraft::runConsoleCommand(std::string command)
 	}
 	catch (IrcSocket::Exception& e)
 	{
+		std::string irc_string = "";
+		std::cout << "Exception caught: " << e.Description() << " (" << e.Errornr() << ")" << std::endl;
 		/*std::string irc_string = "";
 		irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server down. starting up\r\n";
 		Send(irc_string);*/
@@ -464,7 +475,7 @@ void RemoteCraft::sha256(char* input, char output[65])
     SHA256_Update(&sha256, input, strlen(input));
     SHA256_Final(hash, &sha256);
     int i = 0;
-    for(i = 0; i < SHA512_DIGEST_LENGTH; i++)
+    for(i = 0; i < SHA256_DIGEST_LENGTH; i++)
     {
         sprintf(output + (i * 2), "%02x", hash[i]);
     }
