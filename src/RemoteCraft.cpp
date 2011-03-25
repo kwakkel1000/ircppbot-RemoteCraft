@@ -179,6 +179,10 @@ void RemoteCraft::runConsoleCommand(std::string command)
 		std::cout << json_string << std::endl;
 		client_socket->Send(json_string);
 
+		std::cout << content_string << std::endl;
+		client_socket->Send(content_string);
+
+
 		client_socket->Recv(recvdata);
 		std::cout << recvdata << std::endl;
 		client_socket->Recv(recvdata);
