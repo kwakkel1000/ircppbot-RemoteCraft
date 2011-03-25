@@ -135,11 +135,11 @@ void RemoteCraft::runConsoleCommand(std::string command)
 
 
 		content_string = "args=%5B";
-		content_string = content_string + "%22";
+		/*content_string = content_string + "%22";
 		content_string = content_string + command;
-		content_string = content_string + "%22";
+		content_string = content_string + "%22";*/
 		content_string = content_string + "%5D&key=";
-		content_string = content_string + GetHashKey("server.runConsoleCommand");
+		content_string = content_string + GetHashKey("server.runConsoleCommand(" + command + ")");
 		content_string = content_string + "&password=";
 		content_string = content_string + Global::Instance().get_ConfigReader().GetString("json_password");
 		content_string = content_string + "\r\n";
