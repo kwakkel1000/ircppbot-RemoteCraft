@@ -8,6 +8,8 @@
 #include <cstring>
 #include <boost/algorithm/string.hpp>
 #include <socket/IrcSocket.h>
+#include "openssl/sha.h"
+#include <stdio.h>
 
 extern "C" ModuleInterface* create()
 {
@@ -112,7 +114,85 @@ void RemoteCraft::ParsePrivmsg(std::string nick, std::string command, std::strin
 				StartServer(nick, true);
         	}
         }
+        if (boost::iequals(command,"console"))
+        {
+			runConsoleCommand(args[0]);
+        }
     }
+}
+
+void RemoteCraft::runConsoleCommand(std::string command)
+{
+	IrcSocket *client_socket;
+	try
+	{
+		client_socket = new IrcSocket();
+		client_socket->Connect( "localhost", Global::Instance().get_ConfigReader().GetString("json_port") );
+		std::string irc_string = "";
+		std::string json_string;
+		std::string content_string;
+
+
+		content_string = "args=%5B";
+		content_string = content_string + "%22";
+		content_string = content_string + command;
+		content_string = content_string + "%22";
+		content_string = content_string + "%5D&key=";
+		content_string = content_string + GetHashKey("server.runConsoleCommand");
+		content_string = content_string + "&password=";
+		content_string = content_string + Global::Instance().get_ConfigReader().GetString("json_password");
+		content_string = content_string + "\r\n";
+
+
+		json_string = "POST /api/call?method=server.runConsoleCommand";
+		json_string = json_string + command;
+		json_string = json_string + " HTTP/1.0\r\n";
+		std::cout << json_string << std::endl;
+		client_socket->Send(json_string);
+
+		json_string = "Host: localhost:";
+		json_string = json_string + Global::Instance().get_ConfigReader().GetString("json_port");
+		json_string = json_string + "\r\n";
+		std::cout << json_string << std::endl;
+		client_socket->Send(json_string);
+
+		json_string = "User-Agent: JsonRPC\r\n";
+		std::cout << json_string << std::endl;
+		client_socket->Send(json_string);
+
+		json_string = "Content-Length: ";
+		json_string = json_string + convertInt(content_string.size());
+		json_string = json_string + "\r\n";
+		std::cout << json_string << std::endl;
+		client_socket->Send(json_string);
+
+		json_string = "Connection: close\r\n";
+		std::cout << json_string << std::endl;
+		client_socket->Send(json_string);
+
+		json_string = "Content-Type: application/x-www-form-urlencoded\r\n";
+		std::cout << json_string << std::endl;
+		client_socket->Send(json_string);
+
+		json_string = "\r\n";
+		std::cout << json_string << std::endl;
+		client_socket->Send(json_string);
+
+		std::cout << content_string << std::endl;
+		client_socket->Send(json_string);
+
+		usleep(2000000);
+		client_socket->Disconnect();
+		delete client_socket;
+		/*irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server still running\r\n";
+		Send(irc_string);*/
+	}
+	catch (IrcSocket::Exception& e)
+	{
+		/*std::string irc_string = "";
+		irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server down. starting up\r\n";
+		Send(irc_string);*/
+	}
 }
 
 void RemoteCraft::StartServer(std::string nick, bool force)
@@ -360,3 +440,48 @@ void RemoteCraft::timerlong()
         }
     }
 }
+
+std::string RemoteCraft::GetHashKey(std::string command)
+{
+	std::string input;
+	input = Global::Instance().get_ConfigReader().GetString("json_user");
+	input = input + command;
+	input = input + Global::Instance().get_ConfigReader().GetString("json_password");
+	input = input + Global::Instance().get_ConfigReader().GetString("json_random");
+	char inputbuffer[input.size()];
+	strcpy(inputbuffer, input.c_str());
+	static char buffer[65];
+	sha256(inputbuffer, buffer);
+	std::string hashkey( buffer );
+	return hashkey;
+}
+
+void RemoteCraft::sha256(char* input, char output[65])
+{
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_CTX sha256;
+    SHA256_Init(&sha256);
+    SHA256_Update(&sha256, input, strlen(input));
+    SHA256_Final(hash, &sha256);
+    int i = 0;
+    for(i = 0; i < SHA512_DIGEST_LENGTH; i++)
+    {
+        sprintf(output + (i * 2), "%02x", hash[i]);
+    }
+    output[64] = 0;
+}
+/*
+void RemoteCraft::sha512(char* input, char output[129])
+{
+    unsigned char hash[SHA512_DIGEST_LENGTH];
+    SHA512_CTX sha512;
+    SHA512_Init(&sha512);
+    SHA512_Update(&sha512, input, strlen(input));
+    SHA512_Final(hash, &sha512);
+    int i = 0;
+    for(i = 0; i < SHA512_DIGEST_LENGTH; i++)
+    {
+        sprintf(output + (i * 2), "%02x", hash[i]);
+    }
+    output[128] = 0;
+}*/
