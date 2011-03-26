@@ -192,6 +192,7 @@ void RemoteCraft::runConsoleCommand(std::vector< std::string > args)
 		std::cout << json_string << std::endl;
 		client_socket->Send(json_string);
 
+		usleep(2000000);
 		recvdata = "";
 		client_socket->Recv(recvdata);
 		std::cout << recvdata << std::endl;
