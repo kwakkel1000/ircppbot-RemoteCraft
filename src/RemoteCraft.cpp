@@ -191,7 +191,7 @@ void RemoteCraft::runConsoleCommand(std::vector< std::string > args)
 		std::cout << json_string << std::endl;
 		client_socket->Send(json_string);
 
-
+		recvdata = "";
 		client_socket->Recv(recvdata);
 		std::cout << recvdata << std::endl;
 		std::vector< std::string > recvVector;
@@ -207,6 +207,7 @@ void RemoteCraft::runConsoleCommand(std::vector< std::string > args)
 			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :error: " + recvdata + "\r\n";
 			Send(irc_string);
 		}
+		recvdata = "";
 
 		usleep(2000000);
 		client_socket->Disconnect();
