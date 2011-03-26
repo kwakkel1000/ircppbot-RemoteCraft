@@ -193,6 +193,8 @@ void RemoteCraft::runConsoleCommand(std::string command)
 		std::cout << recvdata << std::endl;
 		client_socket->Recv(recvdata);
 		std::cout << recvdata << std::endl;
+		client_socket->Recv(recvdata);
+		std::cout << recvdata << std::endl;
 
 		usleep(2000000);
 		client_socket->Disconnect();
