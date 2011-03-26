@@ -132,90 +132,99 @@ void RemoteCraft::runConsoleCommand(std::vector< std::string > args)
 	{
 		client_socket = new Socket();
 		std::string host = "127.0.0.1";
-		client_socket->connect( host, convertString(Global::Instance().get_ConfigReader().GetString("json_port")));
-		std::string irc_string = "";
-		std::string recvdata = "";
-		std::string json_string;
-		std::string content_string;
-
-
-		content_string = "args=%5B";
-		//string parse
-		for (unsigned int args_it = 0; args_it < args.size(); args_it++)
+		if(client_socket->connect( host, convertString(Global::Instance().get_ConfigReader().GetString("json_port"))))
 		{
-			content_string = content_string + "%22";
-			content_string = content_string + args[args_it];
+			std::string irc_string = "";
+			std::string recvdata = "";
+			std::string json_string;
+			std::string content_string;
+
+
+			content_string = "args=%5B";
+			//string parse
+			for (unsigned int args_it = 0; args_it < args.size(); args_it++)
+			{
+				content_string = content_string + "%22";
+				content_string = content_string + args[args_it];
+			}
+			if (args.size() > 0)
+			{
+				content_string = content_string + "%22";
+			}
+			content_string = content_string + "%5D&key=";
+			content_string = content_string + GetHashKey("server.runConsoleCommand");
+			content_string = content_string + "&password=";
+			content_string = content_string + Global::Instance().get_ConfigReader().GetString("json_password");
+
+
+			json_string = "POST /api/call?method=server.runConsoleCommand";
+			json_string = json_string + " HTTP/1.0\r\n";
+			std::cout << json_string << std::endl;
+			if(!client_socket->send(json_string))
+			{
+				std::cout << "error sending" << std::endl;
+			}
+
+			json_string = "Host: localhost:";
+			json_string = json_string + Global::Instance().get_ConfigReader().GetString("json_port");
+			json_string = json_string + "\r\n";
+			std::cout << json_string << std::endl;
+			client_socket->send(json_string);
+
+			json_string = "User-Agent: JsonRPC\r\n";
+			std::cout << json_string << std::endl;
+			client_socket->send(json_string);
+
+			json_string = "Content-Length: ";
+			json_string = json_string + convertInt(content_string.size());
+			json_string = json_string + "\r\n";
+			std::cout << json_string << std::endl;
+			client_socket->send(json_string);
+
+			json_string = "Connection: close\r\n";
+			std::cout << json_string << std::endl;
+			client_socket->send(json_string);
+
+			json_string = "Content-Type: application/x-www-form-urlencoded\r\n";
+			std::cout << json_string << std::endl;
+			client_socket->send(json_string);
+
+			json_string = "\r\n";
+			std::cout << json_string << std::endl;
+			client_socket->send(json_string);
+
+			json_string = content_string + "\r\n";
+			std::cout << json_string << std::endl;
+			if(!client_socket->send(json_string))
+			{
+				std::cout << "error sending" << std::endl;
+			}
+
+			recvdata = "";
+			int status = client_socket->recv(recvdata);
+			std::cout << status << std::endl;
+			std::cout << recvdata << std::endl;
+			std::vector< std::string > recvVector;
+			boost::split( recvVector, recvdata, boost::is_any_of(" "), boost::token_compress_on );
+
+			if (recvVector[1] == "200")
+			{
+				irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :success\r\n";
+				Send(irc_string);
+			}
+			else
+			{
+				irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :error: " + recvdata + "\r\n";
+				Send(irc_string);
+			}
+			recvdata = "";
+
+			usleep(2000000);
+			//client_socket->disconnect();
+			delete client_socket;
+			/*irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server still running\r\n";
+			Send(irc_string);*/
 		}
-		if (args.size() > 0)
-		{
-			content_string = content_string + "%22";
-		}
-		content_string = content_string + "%5D&key=";
-		content_string = content_string + GetHashKey("server.runConsoleCommand");
-		content_string = content_string + "&password=";
-		content_string = content_string + Global::Instance().get_ConfigReader().GetString("json_password");
-
-
-		json_string = "POST /api/call?method=server.runConsoleCommand";
-		json_string = json_string + " HTTP/1.0\r\n";
-		std::cout << json_string << std::endl;
-		client_socket->send(json_string);
-
-		json_string = "Host: localhost:";
-		json_string = json_string + Global::Instance().get_ConfigReader().GetString("json_port");
-		json_string = json_string + "\r\n";
-		std::cout << json_string << std::endl;
-		client_socket->send(json_string);
-
-		json_string = "User-Agent: JsonRPC\r\n";
-		std::cout << json_string << std::endl;
-		client_socket->send(json_string);
-
-		json_string = "Content-Length: ";
-		json_string = json_string + convertInt(content_string.size());
-		json_string = json_string + "\r\n";
-		std::cout << json_string << std::endl;
-		client_socket->send(json_string);
-
-		json_string = "Connection: close\r\n";
-		std::cout << json_string << std::endl;
-		client_socket->send(json_string);
-
-		json_string = "Content-Type: application/x-www-form-urlencoded\r\n";
-		std::cout << json_string << std::endl;
-		client_socket->send(json_string);
-
-		json_string = "\r\n";
-		std::cout << json_string << std::endl;
-		client_socket->send(json_string);
-
-		json_string = content_string + "\r\n";
-		std::cout << json_string << std::endl;
-		client_socket->send(json_string);
-
-		recvdata = "";
-		client_socket->recv(recvdata);
-		std::cout << recvdata << std::endl;
-		std::vector< std::string > recvVector;
-		boost::split( recvVector, recvdata, boost::is_any_of(" "), boost::token_compress_on );
-
-		if (recvVector[1] == "200")
-		{
-			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :success\r\n";
-			Send(irc_string);
-		}
-		else
-		{
-			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :error: " + recvdata + "\r\n";
-			Send(irc_string);
-		}
-		recvdata = "";
-
-		usleep(2000000);
-		//client_socket->disconnect();
-		delete client_socket;
-		/*irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server still running\r\n";
-		Send(irc_string);*/
 	}
 	catch (IrcSocket::Exception& e)
 	{
