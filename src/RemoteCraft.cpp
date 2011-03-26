@@ -8,6 +8,7 @@
 #include <cstring>
 #include <boost/algorithm/string.hpp>
 #include <socket/IrcSocket.h>
+#include <socket/Socket.h>
 #include "openssl/sha.h"
 #include <stdio.h>
 
@@ -126,11 +127,12 @@ void RemoteCraft::ParsePrivmsg(std::string nick, std::string command, std::strin
 
 void RemoteCraft::runConsoleCommand(std::vector< std::string > args)
 {
-	IrcSocket *client_socket;
+	Socket *client_socket;
 	try
 	{
-		client_socket = new IrcSocket();
-		client_socket->Connect( "localhost", Global::Instance().get_ConfigReader().GetString("json_port") );
+		client_socket = new Socket();
+		std::string host = "127.0.0.1";
+		client_socket->connect( host, convertString(Global::Instance().get_ConfigReader().GetString("json_port")));
 		std::string irc_string = "";
 		std::string recvdata = "";
 		std::string json_string;
@@ -157,42 +159,42 @@ void RemoteCraft::runConsoleCommand(std::vector< std::string > args)
 		json_string = "POST /api/call?method=server.runConsoleCommand";
 		json_string = json_string + " HTTP/1.0\r\n";
 		std::cout << json_string << std::endl;
-		client_socket->Send(json_string);
+		client_socket->send(json_string);
 
 		json_string = "Host: localhost:";
 		json_string = json_string + Global::Instance().get_ConfigReader().GetString("json_port");
 		json_string = json_string + "\r\n";
 		std::cout << json_string << std::endl;
-		client_socket->Send(json_string);
+		client_socket->send(json_string);
 
 		json_string = "User-Agent: JsonRPC\r\n";
 		std::cout << json_string << std::endl;
-		client_socket->Send(json_string);
+		client_socket->send(json_string);
 
 		json_string = "Content-Length: ";
 		json_string = json_string + convertInt(content_string.size());
 		json_string = json_string + "\r\n";
 		std::cout << json_string << std::endl;
-		client_socket->Send(json_string);
+		client_socket->send(json_string);
 
 		json_string = "Connection: close\r\n";
 		std::cout << json_string << std::endl;
-		client_socket->Send(json_string);
+		client_socket->send(json_string);
 
 		json_string = "Content-Type: application/x-www-form-urlencoded\r\n";
 		std::cout << json_string << std::endl;
-		client_socket->Send(json_string);
+		client_socket->send(json_string);
 
 		json_string = "\r\n";
 		std::cout << json_string << std::endl;
-		client_socket->Send(json_string);
+		client_socket->send(json_string);
 
 		json_string = content_string + "\r\n";
 		std::cout << json_string << std::endl;
-		client_socket->Send(json_string);
+		client_socket->send(json_string);
 
 		recvdata = "";
-		client_socket->Recv(recvdata);
+		client_socket->recv(recvdata);
 		std::cout << recvdata << std::endl;
 		std::vector< std::string > recvVector;
 		boost::split( recvVector, recvdata, boost::is_any_of(" "), boost::token_compress_on );
@@ -210,7 +212,7 @@ void RemoteCraft::runConsoleCommand(std::vector< std::string > args)
 		recvdata = "";
 
 		usleep(2000000);
-		client_socket->Disconnect();
+		//client_socket->disconnect();
 		delete client_socket;
 		/*irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server still running\r\n";
 		Send(irc_string);*/
