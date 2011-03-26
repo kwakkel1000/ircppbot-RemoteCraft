@@ -131,8 +131,7 @@ void RemoteCraft::runConsoleCommand(std::vector< std::string > args)
 	try
 	{
 		client_socket = new Socket();
-		std::string host = "127.0.0.1";
-		if(client_socket->connect( host, convertString(Global::Instance().get_ConfigReader().GetString("json_port"))))
+		if(client_socket->connect( "localhost", convertString(Global::Instance().get_ConfigReader().GetString("json_port"))))
 		{
 			std::string irc_string = "";
 			std::string recvdata = "";
@@ -224,6 +223,10 @@ void RemoteCraft::runConsoleCommand(std::vector< std::string > args)
 			delete client_socket;
 			/*irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server still running\r\n";
 			Send(irc_string);*/
+		}
+		else
+		{
+			std::cout << "couldnt connect" << std::endl;
 		}
 	}
 	catch (IrcSocket::Exception& e)
