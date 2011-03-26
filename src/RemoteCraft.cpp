@@ -114,14 +114,17 @@ void RemoteCraft::ParsePrivmsg(std::string nick, std::string command, std::strin
 				StartServer(nick, true);
         	}
         }
+    }
+    if (args.size() >= 1)
+    {
         if (boost::iequals(command,"console"))
         {
-			runConsoleCommand(args[0]);
+			runConsoleCommand(args);
         }
     }
 }
 
-void RemoteCraft::runConsoleCommand(std::string command)
+void RemoteCraft::runConsoleCommand(std::vector< std::string > args)
 {
 	IrcSocket *client_socket;
 	try
@@ -135,9 +138,16 @@ void RemoteCraft::runConsoleCommand(std::string command)
 
 
 		content_string = "args=%5B";
-		content_string = content_string + "%22";
-		content_string = content_string + command;
-		content_string = content_string + "%22";
+		//string parse
+		for (unsigned int args_it = 0; args_it < args.size(); args_it++)
+		{
+			content_string = content_string + "%22";
+			content_string = content_string + args[args_it];
+		}
+		if (args.size() > 0)
+		{
+			content_string = content_string + "%22";
+		}
 		content_string = content_string + "%5D&key=";
 		content_string = content_string + GetHashKey("server.runConsoleCommand");
 		content_string = content_string + "&password=";
@@ -145,7 +155,6 @@ void RemoteCraft::runConsoleCommand(std::string command)
 
 
 		json_string = "POST /api/call?method=server.runConsoleCommand";
-		//json_string = json_string + command;
 		json_string = json_string + " HTTP/1.0\r\n";
 		std::cout << json_string << std::endl;
 		client_socket->Send(json_string);
@@ -185,16 +194,19 @@ void RemoteCraft::runConsoleCommand(std::string command)
 
 		client_socket->Recv(recvdata);
 		std::cout << recvdata << std::endl;
-		client_socket->Recv(recvdata);
-		std::cout << recvdata << std::endl;
-		client_socket->Recv(recvdata);
-		std::cout << recvdata << std::endl;
-		client_socket->Recv(recvdata);
-		std::cout << recvdata << std::endl;
-		client_socket->Recv(recvdata);
-		std::cout << recvdata << std::endl;
-		client_socket->Recv(recvdata);
-		std::cout << recvdata << std::endl;
+		std::vector< std::string > recvVector;
+		boost::split( recvVector, recvdata, boost::is_any_of(" "), boost::token_compress_on );
+
+		if (recvVector[1] == "200")
+		{
+			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :success\r\n";
+			Send(irc_string);
+		}
+		else
+		{
+			irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :error: " + recvdata + "\r\n";
+			Send(irc_string);
+		}
 
 		usleep(2000000);
 		client_socket->Disconnect();
@@ -206,9 +218,8 @@ void RemoteCraft::runConsoleCommand(std::string command)
 	{
 		std::string irc_string = "";
 		std::cout << "Exception caught: " << e.Description() << " (" << e.Errornr() << ")" << std::endl;
-		/*std::string irc_string = "";
-		irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :server down. starting up\r\n";
-		Send(irc_string);*/
+		irc_string = "PRIVMSG " + Global::Instance().get_ConfigReader().GetString("remotecraftchannel") + " :error: " + e.Description() + "\r\n";
+		Send(irc_string);
 	}
 }
 

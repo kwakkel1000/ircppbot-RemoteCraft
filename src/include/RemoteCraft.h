@@ -37,7 +37,7 @@ private:
     boost::shared_ptr<boost::thread> privmsg_parse_thread;
 
 	//functions
-	void runConsoleCommand(std::string command);
+	void runConsoleCommand(std::vector< std::string > args);
 	std::string GetHashKey(std::string command);
     void sha256(char* input, char output[65]);
     //void sha512(char* input, char output[129]);
