@@ -135,18 +135,17 @@ void RemoteCraft::runConsoleCommand(std::string command)
 
 
 		content_string = "args=%5B";
-		/*content_string = content_string + "%22";
+		content_string = content_string + "%22";
 		content_string = content_string + command;
-		content_string = content_string + "%22";*/
+		content_string = content_string + "%22";
 		content_string = content_string + "%5D&key=";
-		content_string = content_string + GetHashKey("server.runConsoleCommand(" + command + ")");
+		content_string = content_string + GetHashKey("server.runConsoleCommand");
 		content_string = content_string + "&password=";
 		content_string = content_string + Global::Instance().get_ConfigReader().GetString("json_password");
-		content_string = content_string + "\r\n";
 
 
 		json_string = "POST /api/call?method=server.runConsoleCommand";
-		json_string = json_string + command;
+		//json_string = json_string + command;
 		json_string = json_string + " HTTP/1.0\r\n";
 		std::cout << json_string << std::endl;
 		client_socket->Send(json_string);
@@ -179,8 +178,9 @@ void RemoteCraft::runConsoleCommand(std::string command)
 		std::cout << json_string << std::endl;
 		client_socket->Send(json_string);
 
-		std::cout << content_string << std::endl;
-		client_socket->Send(content_string);
+		json_string = content_string + "\r\n";
+		std::cout << json_string << std::endl;
+		client_socket->Send(json_string);
 
 
 		client_socket->Recv(recvdata);
@@ -463,6 +463,7 @@ std::string RemoteCraft::GetHashKey(std::string command)
 	input = input + command;
 	input = input + Global::Instance().get_ConfigReader().GetString("json_password");
 	input = input + Global::Instance().get_ConfigReader().GetString("json_random");
+	std::cout << "input: " << input << std::endl;
 	char inputbuffer[input.size()];
 	strcpy(inputbuffer, input.c_str());
 	static char buffer[65];
