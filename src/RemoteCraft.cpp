@@ -31,6 +31,7 @@ RemoteCraft::~RemoteCraft()
 	Global::Instance().get_IrcData().DelConsumer(mpDataInterface);
     delete mpDataInterface;
 }
+
 void RemoteCraft::Init(DataInterface* pData)
 {
 	mpDataInterface = pData;
@@ -437,9 +438,6 @@ void RemoteCraft::timerrun()
     {
         if (timer_sec[i] < Tijd)
         {
-			int Tijd;
-			time_t t= time(0);
-			Tijd = t;
 			int backup_time = convertString(Global::Instance().get_ConfigReader().GetString("backuptime"));
             std::cout << timer_command[i] << std::endl;
             timer_sec.erase(timer_sec.begin()+i);
@@ -447,7 +445,7 @@ void RemoteCraft::timerrun()
 
             save();
 
-			timer_long_sec.push_back(Tijd + backup_time);
+			timer_long_sec.push_back(timer_sec[i] + backup_time);
 			timer_long_command.push_back("backup");
         }
     }
