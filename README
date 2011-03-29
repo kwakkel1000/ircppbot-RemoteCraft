@@ -1,3 +1,8 @@
 building:
+mkdir [topdir]conf/RemoteCraft/
+cp conf.ini.example [topdir]conf/RemoteCraft/conf.ini
+
+add conf/RemoteCraft/conf.ini to [topdir]conf/conf.ini  under the [config] section
+
 make clean
 make all

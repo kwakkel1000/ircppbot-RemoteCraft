@@ -1,0 +1,10 @@
+[remotecraft]
+remotecrafttrigger=@
+backuptime=3600
+
+[json]
+json_port=port
+json_user=admin
+json_password=pass
+json_random=salt
+
