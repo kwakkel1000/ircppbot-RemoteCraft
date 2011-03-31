@@ -8,3 +8,8 @@ json_user=admin
 json_password=pass
 json_random=salt
 
+remotecraftname=
+remotecraftpass=
+remotecrafttcpport=port
+remotecraftstartexecutable=start_server.sh
+remotecraftkill=kill_rtoolkit.sh
